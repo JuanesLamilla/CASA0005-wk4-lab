@@ -1,0 +1,72 @@
+---
+title: "Analysis"
+author: "Juan Lamilla"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sf)
+library(countrycode)
+library(dplyr)
+library(ggplot2)
+```
+
+## Instructions
+
+The task this week is to:
+
+Read in global gender inequality data.
+
+Join the global gender inequality index to spatial data of the World, creating a new column of difference in inequality between 2010 and 2019.
+
+Share it with the World on GitHub.
+
+Add you repository URL to the circulated spreadsheet.
+
+Tip the countrycode R package will be helpful!
+
+Tip the gender inequality has changed in the last year, you will find what you need in the “All composite indices and components time series (1990-2021)” dataset, the metadata file beneath it will explain what the columns are.
+
+### Loading and Cleaning the Data
+
+```{r loading}
+# Load in global gender inequality as csv
+global_gii_df <- read.csv('data/HDR21-22_Composite_indices_complete_time_series.csv')
+
+# Remove all columns except country, iso3, gii_1990, gii_2021
+global_gii_df <- global_gii_df[,c('iso3', 'country', 'gii_1990', 'gii_2021')]
+
+# Remove all rows where gii_1990 or gii_2021 is NA
+global_gii_df <- global_gii_df[!is.na(global_gii_df$gii_1990) & !is.na(global_gii_df$gii_2021),]
+
+# Create a new column called gii_diff that is the difference between gii_1990 and gii_2021
+global_gii_df$gii_diff <- global_gii_df$gii_2021 - global_gii_df$gii_1990
+
+# Load in countries shp
+country_shp <- st_read('data/World_Countries_Generalized.shp')
+
+# Using countrycodes, add in iso3 column to countries shp based on the country column
+country_shp$iso3 <- countrycode(country_shp$COUNTRY, 'country.name', 'iso3c')
+```
+
+### Joining the Data
+
+```{r joining}
+# Join global_gii_df gii_diff column to country_shp based on iso3 using left_join
+country_shp <- left_join(country_shp, global_gii_df[,c('iso3', 'gii_diff')], by = 'iso3')
+```
+
+### Mapping the Data
+
+```{r mapping}
+# Create a map of country_shp with gii_diff as the fill using a red/green gradient
+ggplot(country_shp) +
+  geom_sf(aes(fill = gii_diff)) +
+  scale_fill_gradient2(low = 'darkgreen', mid = 'white', high = 'red', midpoint = 0) +
+  theme_void() + 
+  labs(title = "Global Gender Inequality Index difference between 1990 and 2019")
+
+```
+
