@@ -1,2 +1,4 @@
 # CASA0005-wk4-lab
-Homework for week 4 of CASA-0005 module.
+You can find the knit analysis html previewed below:
+
+https://htmlpreview.github.io/?https://github.com/JuanesLamilla/CASA0005-wk4-lab/blob/main/analysis.html
