@@ -45,7 +45,7 @@ global_gii_df <- global_gii_df[!is.na(global_gii_df$gii_1990) & !is.na(global_gi
 global_gii_df$gii_diff <- global_gii_df$gii_2021 - global_gii_df$gii_1990
 
 # Create a new column called gii_change that shows whether GII improved or worsened
-global_gii_df$gii_change <- case_when(global_gii_df$gii_diff <= 0 ~ "Improved", TRUE ~ "Worsened", na.values = NA)
+global_gii_df$gii_change <- ifelse(global_gii_df$gii_diff > 0, 'Worsened', 'Improved')
 
 # Load in countries shp
 country_shp <- st_read('data/World_Countries_Generalized.shp')
